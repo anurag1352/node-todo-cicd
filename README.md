@@ -17,3 +17,5 @@ or Run by docker compose
 
 test
 
+docker-compose down
+docker-compose up -d
