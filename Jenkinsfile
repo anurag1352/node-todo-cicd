@@ -1,34 +1,37 @@
 pipeline{
-    agent { label 'dev-server' }
     
+    agent { label "dev" }
     stages{
         stage("Code Clone"){
             steps{
-                echo "Code Clone Stage"
-                git url: "https://github.com/LondheShubham153/node-todo-cicd.git", branch: "master"
+                echo "Cloning Start"
+                git url: "https://github.com/anurag1352/node-todo-cicd.git", branch: "master"
+                echo "Cloning Successfull."
             }
         }
-        stage("Code Build & Test"){
+        stage("Code Build"){
             steps{
-                echo "Code Build Stage"
-                sh "docker build -t node-app ."
+                echo "Image Building Start....."
+                sh "docker build -t node-todo-app ."
+                echo "Image Build Successful.."
             }
         }
-        stage("Push To DockerHub"){
+        stage("File & image Scanning"){
             steps{
-                withCredentials([usernamePassword(
-                    credentialsId:"dockerHubCreds",
-                    usernameVariable:"dockerHubUser", 
-                    passwordVariable:"dockerHubPass")]){
-                sh 'echo $dockerHubPass | docker login -u $dockerHubUser --password-stdin'
-                sh "docker image tag node-app:latest ${env.dockerHubUser}/node-app:latest"
-                sh "docker push ${env.dockerHubUser}/node-app:latest"
-                }
+                sh "trivy fs . -o result.json"
             }
         }
-        stage("Deploy"){
+        stage("Code Testing"){
             steps{
-                sh "docker compose down && docker compose up -d --build"
+                echo "Code Testing Start...."
+                echo "Testing Successful"
+            }
+        }
+        stage("Code Deploy."){
+            steps{
+                echo "Deployment Start..."
+                sh "docker-compose down && docker-compose up -d"
+                echo "Deployment Done...."
             }
         }
     }
