@@ -18,13 +18,22 @@ pipeline{
         }
         stage("File & image Scanning"){
             steps{
-                sh "trivy fs . -o result.json"
+                trivy fs . -o result.json
             }
         }
         stage("Code Testing"){
             steps{
                 echo "Code Testing Start...."
                 echo "Testing Successful"
+            }
+        }
+        stage("Push To DockerHub"){
+            steps{
+                withCredentials([usernamePassword(credentialsId: "dockerHubCreds", passwordVariable: "dockerHubPass", usernameVariable: "dockerHubUser")]){
+                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}",
+                    sh "docker image tag node-todo-app:latest ${env.dockerHubUser}/node-todo-app:latest",
+                    sh "docker push ${env.dockerHubUser}/node-todo-app:latest}"
+                }
             }
         }
         stage("Code Deploy."){
