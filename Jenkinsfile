@@ -18,7 +18,7 @@ pipeline{
         }
         stage("File & image Scanning"){
             steps{
-                trivy fs . -o result.json
+               sh "trivy fs . -o result.json"
             }
         }
         stage("Code Testing"){
